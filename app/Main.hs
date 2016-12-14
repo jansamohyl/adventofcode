@@ -1,6 +1,6 @@
 module Main where
 
-import Advent2015
+import Advent2016
 
 main :: IO ()
-main = m12b
+main = m1b

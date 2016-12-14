@@ -1,10 +1,13 @@
 -- Advent of Code - utilities
 {-# LANGUAGE OverloadedStrings #-}
 module AdventUtils(isEven, returnList, countItem, splitAtAll, combinations,
-                   enumerate, bigrams, trigrams, tup2List, parse, traceExpr,
+                   enumerate, bigrams, trigrams, tup2List, taxicabDistance,
+                   firstDuplicate,
+                   parse, traceExpr,
                    runTest, runTests, run
                   ) where
 
+import qualified Data.Maybe as DMY
 import qualified Debug.Trace as T
 
 isEven :: Int -> Bool
@@ -37,6 +40,14 @@ trigrams s = zip3 s (tail s) (tail $ tail s)
 
 tup2List :: (a,a) -> [a]
 tup2List (a1,a2) = [a1,a2]
+
+taxicabDistance :: (Int,Int) -> (Int,Int) -> Int
+taxicabDistance (sx, sy) (ex, ey) = (abs (ex - sx)) + (abs (ey - sy))
+
+firstDuplicate :: Eq a => [a] -> Maybe a
+firstDuplicate list = DMY.listToMaybe $ map snd $ dropWhile predicate (enumerate list)
+  where
+     predicate (i,x) = all (x /=) (take i list)
 
 parse :: Read a => String -> Maybe a
 parse s = case (reads s :: Read a => [(a,String)]) of

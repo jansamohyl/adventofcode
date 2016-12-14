@@ -1,5 +1,5 @@
 name:                advent
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            Advent of Code problems
 description:         Please see README.md
 homepage:            https://github.com/jansamohyl/advent#readme
@@ -15,12 +15,13 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Advent2015 AdventUtils
+  exposed-modules:     Advent2015 Advent2016 AdventUtils
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , bytestring
                      , MissingH
                      , scientific
+                     , text
                      , unordered-containers
                      , vector
   default-language:    Haskell2010
