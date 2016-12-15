@@ -1,6 +1,6 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b
+module Advent2016(m1a, m1b, m2a, m2b
                  ) where
 
 import qualified Data.Bifunctor as DBF
@@ -83,3 +83,32 @@ s1b input = taxicabDistance (s1AbsPos start) $ DMY.fromJust $ firstDuplicate pos
         interpreter moves instruction = s1InterpretSteps (last moves) instruction
 
 m1b = run s1b t1b i1
+
+-- Day 2
+
+i2 = fmap lines $ readFile $ dataFile "d02.in"
+
+t2a = [(["U","L","R","D"],"2125"),(["ULL","RRDDD","LURDL","UUUUD"],"1985")]
+
+s2KeypadMove :: ([Char], [Char], [Char], [Char]) -> Char -> Char -> Char
+s2KeypadMove (kpu, kpd, kpr, kpl) position direction = case direction of
+  'U' -> translate kpu
+  'D' -> translate kpd
+  'R' -> translate kpr
+  'L' -> translate kpl
+  where
+    translate newkeypad = newkeypad !! (DMY.fromJust $ DL.elemIndex position "0123456789ABCDEF")
+
+s2KeypadDecode keypad input = tail $ scanl decodeDigit '5' input 
+  where
+    decodeDigit = foldl $ s2KeypadMove keypad
+
+s2a = s2KeypadDecode (" 123123456", " 456789789", " 233566899", " 112445778")
+
+m2a = run s2a t2a i2
+
+s2b = s2KeypadDecode (" 121452349678B", " 36785ABC9ADCD", " 134467899BCCD", " 122355678AABD")
+
+t2b = [(["ULL","RRDDD","LURDL","UUUUD"],"5DB3")]
+
+m2b = run s2b t2b i2
