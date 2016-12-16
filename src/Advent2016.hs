@@ -1,6 +1,6 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b, m2a, m2b
+module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b
                  ) where
 
 import qualified Data.Bifunctor as DBF
@@ -112,3 +112,33 @@ s2b = s2KeypadDecode (" 121452349678B", " 36785ABC9ADCD", " 134467899BCCD", " 12
 t2b = [(["ULL","RRDDD","LURDL","UUUUD"],"5DB3")]
 
 m2b = run s2b t2b i2
+
+-- Day 3
+
+i3 = fmap lines $ readFile $ dataFile "d03.in"
+
+t3a = [(["5 10 25"],0)]
+
+s3CheckTriangle :: Int -> Int -> Int -> Bool
+s3CheckTriangle a b c = (check a b c) && (check b c a) && (check c a b)
+  where
+    check a b c = (a + b) > c
+
+s3CountTriangles :: [[Int]] -> Int
+s3CountTriangles triangles = length $ filter check triangles
+  where
+    check :: [Int] -> Bool
+    check triangle = s3CheckTriangle (triangle !! 0) (triangle !! 1) (triangle !! 2)
+
+s3a input = s3CountTriangles $ map numberList input
+
+m3a = run s3a t3a i3
+
+t3b = [(["101 301 501","102 302 502","103 303 503","201 401 601","202 402 602","203 403 603"],6)]
+
+s3TripletTranspose :: [[Int]] -> [[Int]]
+s3TripletTranspose list = concat $ map DL.transpose $ splitAtAll 3 list
+
+s3b input = s3CountTriangles $ s3TripletTranspose $ map numberList input
+
+m3b = run s3b t3b i3

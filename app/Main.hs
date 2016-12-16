@@ -3,4 +3,4 @@ module Main where
 import Advent2016
 
 main :: IO ()
-main = m2b
+main = m3b

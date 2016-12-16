@@ -3,7 +3,7 @@
 module AdventUtils(isEven, returnList, countItem, splitAtAll, combinations,
                    enumerate, bigrams, trigrams, tup2List, taxicabDistance,
                    firstDuplicate,
-                   parse, traceExpr,
+                   numberList, parse, traceExpr,
                    runTest, runTests, run
                   ) where
 
@@ -48,6 +48,9 @@ firstDuplicate :: Eq a => [a] -> Maybe a
 firstDuplicate list = DMY.listToMaybe $ map snd $ dropWhile predicate (enumerate list)
   where
      predicate (i,x) = all (x /=) (take i list)
+
+numberList :: String -> [Int]
+numberList s = map read $ words s
 
 parse :: Read a => String -> Maybe a
 parse s = case (reads s :: Read a => [(a,String)]) of
