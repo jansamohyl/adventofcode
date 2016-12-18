@@ -1,6 +1,6 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b
+module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b, m6a, m6b
                  ) where
 
 import qualified Data.Bifunctor as DBF
@@ -219,3 +219,26 @@ s5b input = head $ dropWhile (elem '-') $ scanl update "--------" $ s5MD5Codes i
     update password code = traceExpr $ s5UpdatePassword password (code !! 6) (code !! 5)
 
 m5b = run s5b t5b i5
+
+-- Day 6
+
+i6 = fmap lines $ readFile $ dataFile "d06.in"
+
+t6Data = ["eedadn","drvtee","eandsr","raavrd","atevrs","tsrnev","sdttsa","rasrtv","nssdts","ntnada","svetve","tesnvt","vntsnd","vrdear","dvrsen","enarar"] 
+t6a = [(t6Data,"easter")]
+
+s6MostCommon :: Ord a => [a] -> a
+s6MostCommon xs = head $ head $ DL.sortOn (negate . length) $ DL.group $ DL.sort xs
+
+s6a input = map s6MostCommon $ DL.transpose input
+
+m6a = run s6a t6a i6
+
+t6b = [(t6Data,"advent")]
+
+s6LeastCommon :: Ord a => [a] -> a
+s6LeastCommon xs = head $ head $ DL.sortOn length $ DL.group $ DL.sort xs
+
+s6b input = map s6LeastCommon $ DL.transpose input
+
+m6b = run s6b t6b i6
