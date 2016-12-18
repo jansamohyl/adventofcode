@@ -1,6 +1,6 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b, m6a, m6b
+module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b, m6a, m6b, m7a, m7b
                  ) where
 
 import qualified Data.Bifunctor as DBF
@@ -242,3 +242,47 @@ s6LeastCommon xs = head $ head $ DL.sortOn length $ DL.group $ DL.sort xs
 s6b input = map s6LeastCommon $ DL.transpose input
 
 m6b = run s6b t6b i6
+
+-- Day 7
+
+i7 = fmap lines $ readFile $ dataFile "d07.in"
+
+t7a = [(["abba[mnop]qrst","abcd[bddb]xyyx","aaaa[qwer]tyui","ioxxoj[asdfgh]zxcvbn"],2)]
+
+s7IsABBA (a:b:c:d:e) = (a /= b) && (a == d) && (b == c)
+
+s7ContainsABBA s = any s7IsABBA $ take (length s - 3) $ DL.tails s
+
+s7ParseAddress :: String -> ([String],[String])
+s7ParseAddress addr = listToTuple $ DL.transpose $ splitAtAll 2 $ words $ map bracketToSpace addr
+  where
+    listToTuple (x:y:[]) = (x,y)
+    bracketToSpace ch = case ch of
+      '[' -> ' '
+      ']' -> ' '
+      otherwise -> ch
+
+s7CheckTLS addr = all (not . s7ContainsABBA) a2 && any s7ContainsABBA a1
+  where
+    (a1,a2) = s7ParseAddress addr
+
+s7a input = length $ filter s7CheckTLS input
+
+m7a = run s7a t7a i7
+
+t7b = [(["aba[bab]xyz","xyx[xyx]xyx","aaa[kek]eke","zazbz[bzb]cdb"],3)]
+
+s7IsABA (a:b:c:d) = (a /= b) && (a == c)
+
+s7CollectABA s = map (take 3) $ filter s7IsABA $ take (length s - 2) $ DL.tails s
+
+s7CheckSSL addr = not $ null $ DL.intersect abas $ map aba2bab babs
+  where
+    (a1,a2) = s7ParseAddress addr
+    abas = DL.nub $ DL.sort $ concatMap s7CollectABA a1
+    babs = DL.nub $ DL.sort $ concatMap s7CollectABA a2
+    aba2bab (a:b:c) = [b,a,b] 
+    
+s7b input = length $ filter s7CheckSSL input
+
+m7b = run s7b t7b i7
