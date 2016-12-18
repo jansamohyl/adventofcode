@@ -60,6 +60,9 @@ parse s = case (reads s :: Read a => [(a,String)]) of
 traceExpr :: Show a => a -> a 
 traceExpr x = T.traceShow x x
 
+traceBreak :: Show a => a -> b
+traceBreak x = const undefined $! traceExpr x
+
 -- Very simple test & run framework
 
 runTest :: (Show a, Show b, Eq b) => (a->b) -> (a,b) -> Either String String

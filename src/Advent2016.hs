@@ -1,6 +1,6 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b
+module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b
                  ) where
 
 import qualified Data.Bifunctor as DBF
@@ -13,6 +13,7 @@ import qualified Data.Maybe as DMY
 import qualified Data.Scientific as DSC
 import qualified Data.String.Utils as DSU
 import qualified Data.Text as DT
+import qualified Data.Tuple.Utils as DTUU
 import qualified Data.Vector as DV
 import qualified Data.Word as DW
 import qualified Debug.Trace as T
@@ -142,3 +143,47 @@ s3TripletTranspose list = concat $ map DL.transpose $ splitAtAll 3 list
 s3b input = s3CountTriangles $ s3TripletTranspose $ map numberList input
 
 m3b = run s3b t3b i3
+
+-- Day 4
+
+i4 = fmap lines $ readFile $ dataFile "d04.in"
+
+t4a = [(["aaaaa-bbb-z-y-x-123[abxyz]","a-b-c-d-e-f-g-h-987[abcde]","not-a-real-room-404[oarel]","totally-real-room-200[decoy]"],1514)]
+
+s4DecodeRoom :: String -> (String,Int,String)
+s4DecodeRoom room = (name, sector, checksum)
+  where
+    (p1,p2) = DL.splitAt (length room - 7) room
+    checksum = init $ tail $ p2
+    lastSep = last $ DL.elemIndices '-' p1
+    (name,secStr) = DL.splitAt lastSep p1
+    sector = read $ tail $ secStr
+
+s4NameChecksum name = map head $ take 5 $ DL.sortOn (negate . length) $ DL.group $ DL.sort $ filter (/= '-') name
+
+s4RoomValid (name, sector, checksum) = (s4NameChecksum name) == checksum
+
+s4a input = DL.sum $ map getSector $ filter s4RoomValid $ map s4DecodeRoom input
+            where
+              getSector (name, sector, checksum) = sector
+
+m4a = run s4a t4a i4
+
+--t4b = [(["qzmt-zixmtkozy-ivhz-343[zimth]"],[("very encrypted name",343)])]
+t4b = []
+
+s4RotatedAlphabet alphabet n = p2 ++ p1
+  where
+    (p1,p2) = DL.splitAt (mod n $ length alphabet) alphabet
+
+s4Decrypt n s = map translate s
+  where
+    translate ch = transTable !! (DMY.fromJust $ DL.elemIndex ch ("-" ++ alphabet))
+    transTable = " " ++ s4RotatedAlphabet alphabet n
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+
+s4DecryptRoom (crypticName, sector, checksum) = (s4Decrypt sector crypticName, sector)
+
+s4b input = filter (DL.isInfixOf "north" . fst) $ map s4DecryptRoom $ filter s4RoomValid $ map s4DecodeRoom input
+
+m4b = run s4b t4b i4
