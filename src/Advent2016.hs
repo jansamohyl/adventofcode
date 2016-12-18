@@ -1,6 +1,6 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b
+module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b
                  ) where
 
 import qualified Data.Bifunctor as DBF
@@ -17,6 +17,8 @@ import qualified Data.Tuple.Utils as DTUU
 import qualified Data.Vector as DV
 import qualified Data.Word as DW
 import qualified Debug.Trace as T
+
+import qualified Data.Hash.MD5 as MD5
 
 import AdventUtils
 
@@ -169,8 +171,7 @@ s4a input = DL.sum $ map getSector $ filter s4RoomValid $ map s4DecodeRoom input
 
 m4a = run s4a t4a i4
 
---t4b = [(["qzmt-zixmtkozy-ivhz-343[zimth]"],[("very encrypted name",343)])]
-t4b = []
+t4b = [(["qzmt-zixmtkozy-ivhz-343[zimth]"],[("very encrypted name",343)])]
 
 s4RotatedAlphabet alphabet n = p2 ++ p1
   where
@@ -186,4 +187,35 @@ s4DecryptRoom (crypticName, sector, checksum) = (s4Decrypt sector crypticName, s
 
 s4b input = filter (DL.isInfixOf "north" . fst) $ map s4DecryptRoom $ filter s4RoomValid $ map s4DecodeRoom input
 
-m4b = run s4b t4b i4
+m4b = run s4b [] i4
+
+-- Day 5
+
+i5 = return "uqwqemis"
+
+t5a = [("abc","18f47a30")]
+
+s5MD5 doorid n = MD5.md5s $ MD5.Str (doorid ++ show n)
+
+s5CheckMD5 zeroes md5 = take zeroes md5 == replicate zeroes '0'
+
+s5MD5Codes doorid = filter (s5CheckMD5 5) $ map (s5MD5 doorid) [0..]
+
+s5a input = take 8 $ map (flip (!!) 5) $ s5MD5Codes input
+
+m5a = run s5a t5a i5
+
+t5b = [("abc","05ace8e3")]
+
+s5UpdatePassword :: String -> Char -> Char -> String
+s5UpdatePassword password ch p = case DL.elemIndex p ['0'..'7'] of
+  Nothing -> password
+  Just i  -> if (password !! i) == '-'
+             then updateList ch i password
+             else password
+
+s5b input = head $ dropWhile (elem '-') $ scanl update "--------" $ s5MD5Codes input
+  where
+    update password code = traceExpr $ s5UpdatePassword password (code !! 6) (code !! 5)
+
+m5b = run s5b t5b i5

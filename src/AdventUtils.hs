@@ -2,11 +2,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 module AdventUtils(isEven, returnList, countItem, splitAtAll, combinations,
                    enumerate, bigrams, trigrams, tup2List, taxicabDistance,
-                   firstDuplicate,
+                   firstDuplicate, updateList,
                    numberList, parse, traceExpr,
                    runTest, runTests, run
                   ) where
 
+import qualified Data.List as DL
 import qualified Data.Maybe as DMY
 import qualified Debug.Trace as T
 
@@ -48,6 +49,11 @@ firstDuplicate :: Eq a => [a] -> Maybe a
 firstDuplicate list = DMY.listToMaybe $ map snd $ dropWhile predicate (enumerate list)
   where
      predicate (i,x) = all (x /=) (take i list)
+
+updateList :: a -> Int -> [a] -> [a]
+updateList x i xs = p1 ++ (x : (tail p2))
+  where
+    (p1,p2) = DL.splitAt i xs
 
 numberList :: String -> [Int]
 numberList s = map read $ words s
