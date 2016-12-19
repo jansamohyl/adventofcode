@@ -2,7 +2,7 @@ name:                advent
 version:             0.2.0.0
 synopsis:            Advent of Code problems
 description:         Please see README.md
-homepage:            https://github.com/jansamohyl/advent#readme
+homepage:            https://github.com/jansamohyl/adventofcode#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Jan Samohyl

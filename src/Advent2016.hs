@@ -1,6 +1,6 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b, m6a, m6b, m7a, m7b, m8a, m8b
+module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b, m6a, m6b, m7a, m7b, m8a, m8b, m9a, m9b
                  ) where
 
 import qualified Data.Array as DA
@@ -330,12 +330,12 @@ s8Rectangle a b (D8Screen screen) = D8Screen $ (DA.//) screen $ map (\(x,y) -> (
 s8RotateRow :: Int -> Int -> D8Screen -> D8Screen
 s8RotateRow y n (D8Screen screen) = D8Screen $ (DA.//) screen $ map rotate s8ScreenColRange
   where
-    rotate x = ((x,y), screen DA.! (clamp s8ScreenColMin s8ScreenColMax (x - n), y))
+    rotate x = ((x,y), screen DA.! (rebound s8ScreenColMin s8ScreenColMax (x - n), y))
 
 s8RotateCol :: Int -> Int -> D8Screen -> D8Screen
 s8RotateCol x n (D8Screen screen) = D8Screen $ (DA.//) screen $ map rotate s8ScreenRowRange
   where
-    rotate y = ((x,y), screen DA.! (x, clamp s8ScreenRowMin s8ScreenRowMax (y - n)))
+    rotate y = ((x,y), screen DA.! (x, rebound s8ScreenRowMin s8ScreenRowMax (y - n)))
 
 data D8Command = D8Rectangle Int Int
                | D8RotateRow Int Int
@@ -367,3 +367,43 @@ t8b = []
 s8b input = s8Run input
 
 m8b = run s8b t8b i8
+
+-- Day 9
+
+i9 = readFile $ dataFile "d09.in"
+
+t9a = [("ADVENT",6),("A(1x5)BC",7),("(3x3)XYZ",9),("A(2x2)BCD(2x2)EFG",11),("(6x1)(1x3)A",6),("X(8x2)(3x3)ABCY",18)]
+
+s9Decompress :: String -> String
+s9Decompress [] = []
+s9Decompress (x:xs) = if x /= '('
+                      then x : s9Decompress xs
+                      else (concat $ replicate repeat s1) ++ s9Decompress s2
+  where
+    (p1,p2) = splitAtElement ')' xs
+    (p11,p12) = splitAtElement 'x' p1
+    len = read p11
+    repeat = read p12
+    (s1,s2) = splitAt len p2
+
+s9a input = length $ s9Decompress $ filter (/= '\n') input
+
+m9a = run s9a t9a i9
+
+t9b = [("(3x3)XYZ",9),("X(8x2)(3x3)ABCY",20),("(27x12)(20x12)(13x14)(7x10)(1x12)A",241920),("(25x3)(3x3)ABC(2x3)XY(5x2)PQRSTX(18x9)(3x2)TWO(5x7)SEVEN",445)]
+
+s9DecompressLength :: String -> Integer
+s9DecompressLength [] = 0
+s9DecompressLength (x:xs) = if x /= '('
+                            then 1 + s9DecompressLength xs
+                            else (repeat * s9DecompressLength s1) + s9DecompressLength s2
+  where
+    (p1,p2) = splitAtElement ')' xs
+    (p11,p12) = splitAtElement 'x' p1
+    len = read p11
+    repeat = read p12
+    (s1,s2) = splitAt len p2
+    
+s9b input = s9DecompressLength $ filter (/= '\n') input
+
+m9b = run s9b t9b i9
