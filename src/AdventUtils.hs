@@ -1,6 +1,6 @@
 -- Advent of Code - utilities
 {-# LANGUAGE OverloadedStrings #-}
-module AdventUtils(isEven, returnList, countItem, splitAtAll, combinations,
+module AdventUtils(isEven, clamp, returnList, countItem, splitAtAll, combinations,
                    enumerate, bigrams, trigrams, tup2List, taxicabDistance,
                    firstDuplicate, updateList,
                    numberList, parse, traceExpr,
@@ -13,6 +13,12 @@ import qualified Debug.Trace as T
 
 isEven :: Int -> Bool
 isEven x = mod x 2 == 0
+
+clamp :: Int -> Int -> Int -> Int
+clamp l h x
+  | x < l = clamp l h (x + h - l + 1)
+  | x > h = clamp l h (x - h + l - 1)
+  | otherwise = x
 
 returnList :: a -> [a]
 returnList = return

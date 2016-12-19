@@ -1,8 +1,9 @@
 -- Advent of Code 2016 problems in Haskell
 {-# LANGUAGE OverloadedStrings #-}
-module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b, m6a, m6b, m7a, m7b
+module Advent2016(m1a, m1b, m2a, m2b, m3a, m3b, m4a, m4b, m5a, m5b, m6a, m6b, m7a, m7b, m8a, m8b
                  ) where
 
+import qualified Data.Array as DA
 import qualified Data.Bifunctor as DBF
 import qualified Data.Bits as DBI
 import qualified Data.ByteString.Lazy as DBS
@@ -10,6 +11,7 @@ import qualified Data.Data as DD
 import qualified Data.HashMap.Strict as DHM
 import qualified Data.List as DL
 import qualified Data.Maybe as DMY
+import qualified Data.Monoid as DMO
 import qualified Data.Scientific as DSC
 import qualified Data.String.Utils as DSU
 import qualified Data.Text as DT
@@ -286,3 +288,82 @@ s7CheckSSL addr = not $ null $ DL.intersect abas $ map aba2bab babs
 s7b input = length $ filter s7CheckSSL input
 
 m7b = run s7b t7b i7
+
+-- Day 8
+
+i8 = fmap lines $ readFile $ dataFile "d08.in"
+
+t8a = [(["rect 3x2"],6),(["rect 3x2","rotate column x=1 by 1","rotate row y=0 by 4","rotate column x=1 by 1"],6)]
+
+newtype D8Screen = D8Screen (DA.Array (Int,Int) Bool)
+                 deriving (Eq)
+
+instance Show D8Screen where
+  show (D8Screen screen) = (++) "Screen:\n" $ DL.intercalate "\n" $ map row s8ScreenRowRange
+    where
+      row y = map (lamp . (DA.!) screen . (\x -> (x,y))) s8ScreenColRange
+      lamp bool = case bool of
+        True  -> '#'
+        False -> '.'
+
+s8ScreenSize = ((0,0),(49,5))
+s8ScreenColMin = fst $ fst s8ScreenSize
+s8ScreenColMax = fst $ snd s8ScreenSize
+s8ScreenColRange = [s8ScreenColMin..s8ScreenColMax]
+s8ScreenRowMin = snd $ fst s8ScreenSize
+s8ScreenRowMax = snd $ snd s8ScreenSize
+s8ScreenRowRange = [s8ScreenRowMin..s8ScreenRowMax]
+
+s8NewScreen :: D8Screen
+s8NewScreen = D8Screen $ DA.array s8ScreenSize $ map (\x -> (x,False)) $ DA.range s8ScreenSize
+
+s8CountScreen :: D8Screen -> Int
+s8CountScreen (D8Screen screen) = DMO.getSum $ foldMap (DMO.Sum . boolToInt) screen
+  where
+    boolToInt bool = case bool of
+      True  -> 1
+      False -> 0
+
+s8Rectangle :: Int -> Int -> D8Screen -> D8Screen
+s8Rectangle a b (D8Screen screen) = D8Screen $ (DA.//) screen $ map (\(x,y) -> ((x,y),True)) $ DA.range ((0,0),(a-1,b-1))
+
+s8RotateRow :: Int -> Int -> D8Screen -> D8Screen
+s8RotateRow y n (D8Screen screen) = D8Screen $ (DA.//) screen $ map rotate s8ScreenColRange
+  where
+    rotate x = ((x,y), screen DA.! (clamp s8ScreenColMin s8ScreenColMax (x - n), y))
+
+s8RotateCol :: Int -> Int -> D8Screen -> D8Screen
+s8RotateCol x n (D8Screen screen) = D8Screen $ (DA.//) screen $ map rotate s8ScreenRowRange
+  where
+    rotate y = ((x,y), screen DA.! (x, clamp s8ScreenRowMin s8ScreenRowMax (y - n)))
+
+data D8Command = D8Rectangle Int Int
+               | D8RotateRow Int Int
+               | D8RotateCol Int Int
+                 deriving (Eq,Show)
+
+s8InterpretCommand :: D8Screen -> D8Command -> D8Screen
+s8InterpretCommand screen command = case command of
+  D8Rectangle a b -> s8Rectangle a b screen
+  D8RotateRow y n -> s8RotateRow y n screen
+  D8RotateCol x n -> s8RotateCol x n screen
+
+s8ParseCommand :: String -> D8Command
+s8ParseCommand cmd = case words cmd of
+  ["rect",dims] -> D8Rectangle (read d1) (read $ tail d2)
+    where
+      (d1, d2) = span (/= 'x') dims
+  ["rotate","row",a,"by",b] -> D8RotateRow (read $ drop 2 a) (read b)
+  ["rotate","column",a,"by",b] -> D8RotateCol (read $ drop 2 a) (read b)
+
+s8Run input = DL.foldl' s8InterpretCommand s8NewScreen $ map s8ParseCommand input
+
+s8a input = s8CountScreen $ s8Run input
+
+m8a = run s8a t8a i8
+
+t8b = []
+
+s8b input = s8Run input
+
+m8b = run s8b t8b i8
